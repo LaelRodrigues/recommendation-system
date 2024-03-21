@@ -1,0 +1,18 @@
+# Arquivos de compilação Java
+*.class
+
+# Arquivos de construção do Maven
+target/
+
+# Arquivos de construção do Gradle
+build/
+
+src/main/resources/
+# Arquivos de configuração do Eclipse
+.settings/
+
+# Arquivos de cache do IntelliJ
+.idea/
+
+# Arquivos de configuração do Visual Studio Code
+.vscode/
