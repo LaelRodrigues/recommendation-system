@@ -18,7 +18,7 @@ public class DataManager {
         ratingsMatrix = new HashMap<>();
     }
 
-    public void carregarDados(String arquivo) {
+    public void loadData(String arquivo) {
         try (BufferedReader reader = new BufferedReader(new FileReader(arquivo))) {
             String line;
             int userIndex = 0;
