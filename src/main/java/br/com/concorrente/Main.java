@@ -7,7 +7,7 @@ import java.io.File;
 public class Main {
     public static void main(String[] args) throws IOException {
 
-        String caminhoArquivo = "src/main/resources/teste2.csv";
+        String caminhoArquivo = "src/main/resources/teste3.csv";
 
         File file = new File(caminhoArquivo);
 
@@ -25,10 +25,10 @@ public class Main {
 
             long startTime = System.currentTimeMillis();
 
-            Thread thread1 = Thread.ofPlatform().start(part1);
-            Thread thread2 = Thread.ofPlatform().start(part2);
-            Thread thread3 = Thread.ofPlatform().start(part3);
-            Thread thread4 = Thread.ofPlatform().start(part4);
+            Thread thread1 = Thread.ofVirtual().start(part1);
+            Thread thread2 = Thread.ofVirtual().start(part2);
+            Thread thread3 = Thread.ofVirtual().start(part3);
+            Thread thread4 = Thread.ofVirtual().start(part4);
 
 
             // Esperando que todas as threads terminem
@@ -56,10 +56,10 @@ public class Main {
 
             startTime = System.currentTimeMillis();
 
-            thread1 = Thread.ofPlatform().start(() -> processRecommendations(combinedData, "A2F6NONFUDB6UK"));
-            thread2 = Thread.ofPlatform().start(() -> processRecommendations(combinedData, "A25MD5I2GUIW6W"));
-            thread3 = Thread.ofPlatform().start(() -> processRecommendations(combinedData, "A373VVEU6Z9M0N"));
-            thread4 = Thread.ofPlatform().start(() -> processRecommendations(combinedData, "A2F6NONFUDB6UK"));
+            thread1 = Thread.ofVirtual().start(() -> processRecommendations(combinedData, "A2F6NONFUDB6UK"));
+            thread2 = Thread.ofVirtual().start(() -> processRecommendations(combinedData, "A25MD5I2GUIW6W"));
+            thread3 = Thread.ofVirtual().start(() -> processRecommendations(combinedData, "A373VVEU6Z9M0N"));
+            thread4 = Thread.ofVirtual().start(() -> processRecommendations(combinedData, "A2F6NONFUDB6UK"));
             
             try {
                 thread1.join();
