@@ -59,12 +59,13 @@ public class Main {
             thread1 = Thread.ofPlatform().start(() -> processRecommendations(combinedData, "A2F6NONFUDB6UK"));
             thread2 = Thread.ofPlatform().start(() -> processRecommendations(combinedData, "A25MD5I2GUIW6W"));
             thread3 = Thread.ofPlatform().start(() -> processRecommendations(combinedData, "A373VVEU6Z9M0N"));
-            thread4 = Thread.ofPlatform().start(() -> processRecommendations(combinedData, "caminhoArquivo"));
+            thread4 = Thread.ofPlatform().start(() -> processRecommendations(combinedData, "A2F6NONFUDB6UK"));
             
             try {
                 thread1.join();
                 thread2.join();
                 thread3.join();
+                thread4.join();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
