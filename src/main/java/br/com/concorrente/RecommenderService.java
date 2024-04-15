@@ -1,17 +1,17 @@
-
 package br.com.concorrente;
 
 import java.util.*;
 
 public class RecommenderService {
     private DataManager dataManager;
+    private static final int NUM_THREADS = 4; // Número de threads a serem usadas
+    private final Object lock = new Object();
 
     public RecommenderService(DataManager dataManager) {
         this.dataManager = dataManager;
     }
 
     public List<Map.Entry<String, Double>> recommendBooks(String userId, int k) {
-
         Map<String, Integer> userIdToIdx = dataManager.getUserIdToIdx();
         Map<Integer, Map<Integer, Double>> ratingsMatrix = dataManager.getRatingsMatrix();
         List<String> bookTitles = dataManager.getBookTitles();
@@ -24,14 +24,41 @@ public class RecommenderService {
 
         Map<Integer, Double> userRatings = ratingsMatrix.getOrDefault(userIdx, new HashMap<>());
 
+        List<Thread> threads = new ArrayList<>();
         Map<Integer, Double> similarities = new HashMap<>();
-        for (Map.Entry<Integer, Map<Integer, Double>> entry : ratingsMatrix.entrySet()) {
-            int otherUserIdx = entry.getKey();
-            if (otherUserIdx != userIdx) {
-                double similarity = calcularSimilaridadeCosseno(userRatings, entry.getValue());
-                if (similarity > 0) {
-                    similarities.put(otherUserIdx, similarity);
+
+        List<Map.Entry<Integer, Map<Integer, Double>>> entries = new ArrayList<>(ratingsMatrix.entrySet());
+        int numEntries = entries.size();
+        int chunkSize = numEntries / NUM_THREADS;
+
+        for (int i = 0; i < NUM_THREADS; i++) {
+            int startIdx = i * chunkSize;
+            int endIdx = (i == NUM_THREADS - 1) ? numEntries : (i + 1) * chunkSize;
+
+            Thread thread = new Thread(() -> {
+                for (int j = startIdx; j < endIdx; j++) {
+                    Map.Entry<Integer, Map<Integer, Double>> entry = entries.get(j);
+                    int otherUserIdx = entry.getKey();
+                    if (otherUserIdx != userIdx) {
+                        double similarity = calcularSimilaridadeCosseno(userRatings, entry.getValue());
+                        if (similarity > 0) {
+                            synchronized (lock) {
+                                similarities.put(otherUserIdx, similarity);
+                            }
+                        }
+                    }
                 }
+            });
+            threads.add(thread);
+            thread.start();
+        }
+
+        for (Thread thread : threads) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                e.printStackTrace();
             }
         }
 
