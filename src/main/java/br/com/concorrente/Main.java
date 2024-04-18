@@ -19,16 +19,16 @@ public class Main {
 
         RecommenderService recommenderService = new RecommenderService(dataManager);
 
-        String userIdAlvo = "A3UH4UZ4RSVO82";
+        String userIdTarget = "A3UH4UZ4RSVO82";
         int k = 5;
 
         startTime = System.currentTimeMillis();
 
-        System.out.println("Recomendações de livros para o usuário " + userIdAlvo + ":");
-        for (Map.Entry<String, Double> entry : recommenderService.recommendBooks(userIdAlvo, k)) {
+        System.out.println("Recomendações de livros para o usuário " + userIdTarget + ":");
+        for (Map.Entry<String, Double> entry : recommenderService.recommendBooks(userIdTarget, k)) {
             System.out.println(entry.getKey() + " - Rating: " + entry.getValue());
         }
-        
+
         endTime = System.currentTimeMillis();
 
         duration = endTime - startTime;

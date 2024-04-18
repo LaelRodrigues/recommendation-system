@@ -27,7 +27,7 @@ public class RecommenderService {
         for (Map.Entry<Integer, Map<Integer, Double>> entry : ratingsMatrix.entrySet()) {
             int otherUserIdx = entry.getKey();
             if (otherUserIdx != userIdx) {
-                double similarity = calcularSimilaridadeCosseno(userRatings, entry.getValue());
+                double similarity = calculateCosineSimilarity(userRatings, entry.getValue());
                 if (similarity > 0) {
                     similarities.put(otherUserIdx, similarity);
                 }
@@ -55,7 +55,7 @@ public class RecommenderService {
         return recommendedBooks;
     }
 
-    private double calcularSimilaridadeCosseno(Map<Integer, Double> vector1, Map<Integer, Double> vector2) {
+    private double calculateCosineSimilarity(Map<Integer, Double> vector1, Map<Integer, Double> vector2) {
         double dotProduct = 0;
         double normVector1 = 0;
         double normVector2 = 0;
