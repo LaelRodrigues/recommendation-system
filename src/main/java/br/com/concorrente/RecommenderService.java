@@ -18,8 +18,7 @@ public class RecommenderService {
 
         int userIdx = userIdToIdx.getOrDefault(userId, -1);
         if (userIdx == -1) {
-            System.out.println("Usuário não encontrado.");
-            return new ArrayList<>();
+            throw new IllegalArgumentException("Usuário não encontrado.");
         }
 
         Map<Integer, Double> userRatings = ratingsMatrix.getOrDefault(userIdx, new HashMap<>());
@@ -35,12 +34,12 @@ public class RecommenderService {
             int startIdx = i * chunkSize;
             int endIdx = (i == NUM_THREADS - 1) ? numEntries : (i + 1) * chunkSize;
 
-            Thread thread = new Thread(() -> {
+            Thread thread = Thread.ofPlatform().start(() -> {
                 for (int j = startIdx; j < endIdx; j++) {
                     Map.Entry<Integer, Map<Integer, Double>> entry = entries.get(j);
                     int otherUserIdx = entry.getKey();
                     if (otherUserIdx != userIdx) {
-                        double similarity = calcularSimilaridadeCosseno(userRatings, entry.getValue());
+                        double similarity = calculateCosineSimilarity(userRatings, entry.getValue());
                         if (similarity > 0) {
                             synchronized (lock) {
                                 similarities.put(otherUserIdx, similarity);
@@ -50,7 +49,6 @@ public class RecommenderService {
                 }
             });
             threads.add(thread);
-            thread.start();
         }
 
         for (Thread thread : threads) {
@@ -83,7 +81,7 @@ public class RecommenderService {
         return recommendedBooks;
     }
 
-    private double calcularSimilaridadeCosseno(Map<Integer, Double> vector1, Map<Integer, Double> vector2) {
+    private double calculateCosineSimilarity(Map<Integer, Double> vector1, Map<Integer, Double> vector2) {
         double dotProduct = 0;
         double normVector1 = 0;
         double normVector2 = 0;

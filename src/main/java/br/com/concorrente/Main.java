@@ -12,7 +12,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 
-        String caminhoArquivo = "src/main/resources/teste3.csv";
+        String caminhoArquivo = "src/main/resources/teste2.csv";
 
         File file = new File(caminhoArquivo);
 
@@ -59,22 +59,7 @@ public class Main {
 
             startTime = System.currentTimeMillis();
 
-            threads = new ArrayList<>();
-
-            String[] users = { "A3UH4UZ4RSVO82", "APYJH0HLLK09U", "A1IE9D5RYN9K8", "A19EWUSJSSJZU7", };
-
-            for (int i = 0; i < users.length; i++) {
-                int index = i;
-                threads.add(Thread.ofPlatform().start(() -> processRecommendations(combinedData, users[index])));
-            }
-
-            for (Thread thread : threads) {
-                try {
-                    thread.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+            processRecommendations(combinedData, "A3UH4UZ4RSVO82");
 
             endTime = System.currentTimeMillis();
             duration = endTime - startTime;
@@ -86,13 +71,17 @@ public class Main {
     }
 
     private static void processRecommendations(DataManager dataManager, String userId) {
-        RecommenderService recommenderService = new RecommenderService(dataManager);
-        int k = 5;
+        try {
+            RecommenderService recommenderService = new RecommenderService(dataManager);
+            int k = 5;
 
-        System.out.println("Recomendações de livros para o usuário " + userId + ":");
-        for (Map.Entry<String, Double> entry : recommenderService.recommendBooks(userId, k)) {
-            System.out.println(entry.getKey() + " - Rating: " + entry.getValue());
+            System.out.println("Recomendações de livros para o usuário " + userId + ":");
+            for (Map.Entry<String, Double> entry : recommenderService.recommendBooks(userId, k)) {
+                System.out.println(entry.getKey() + " - Rating: " + entry.getValue());
+            }
+            System.err.println("--------------------");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Erro ao recomendar livros: " + e.getMessage());
         }
-        System.err.println("--------------------");
     }
 }
