@@ -8,11 +8,11 @@ import java.util.ArrayList;
 
 public class Main {
 
-    public static final int NUM_THREADS = 4;
+    public static final int NUM_THREADS = 3;
 
     public static void main(String[] args) throws IOException {
 
-        String caminhoArquivo = "src/main/resources/teste2.csv";
+        String caminhoArquivo = "src/main/resources/teste3.csv";
 
         File file = new File(caminhoArquivo);
 
@@ -20,15 +20,21 @@ public class Main {
 
             long tamanhoArquivo = file.length();
 
-            int parte = (int) tamanhoArquivo / 4;
+            long parte = tamanhoArquivo / NUM_THREADS;
 
-            DataManager[] parts = new DataManager[4];
+            DataManager[] parts = new DataManager[NUM_THREADS];
 
-            parts[0] = new DataManager(caminhoArquivo, 0, parte);
-            parts[1] = new DataManager(caminhoArquivo, parte, parte * 2);
-            parts[2] = new DataManager(caminhoArquivo, parte * 2, parte * 2);
-            parts[3] = new DataManager(caminhoArquivo, parte * 3, (int) tamanhoArquivo);
+            long inicioParte = 0;
+            long fimParte = parte;
 
+            for (int i = 0; i < NUM_THREADS; i++) {
+                parts[i] = new DataManager(caminhoArquivo, (int) inicioParte, (int) fimParte);
+                inicioParte = fimParte;
+                fimParte += parte;
+                if (i == NUM_THREADS - 2) {
+                    fimParte = tamanhoArquivo;
+                }
+            }
             long startTime = System.currentTimeMillis();
 
             List<Thread> threads = new ArrayList<>();

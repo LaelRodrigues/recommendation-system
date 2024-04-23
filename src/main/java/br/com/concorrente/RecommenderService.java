@@ -4,7 +4,7 @@ import java.util.*;
 
 public class RecommenderService {
     private DataManager dataManager;
-    private static final int NUM_THREADS = 4; // Número de threads a serem usadas
+    private static final int NUM_THREADS = 20; // Número de threads a serem usadas
     private final Object lock = new Object();
 
     public RecommenderService(DataManager dataManager) {
