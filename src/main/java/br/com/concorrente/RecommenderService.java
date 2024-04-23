@@ -1,11 +1,12 @@
 package br.com.concorrente;
 
 import java.util.*;
+import java.util.concurrent.Semaphore;
 
 public class RecommenderService {
     private DataManager dataManager;
     private static final int NUM_THREADS = 20; // Número de threads a serem usadas
-    private final Object lock = new Object();
+    private final Semaphore semaphore = new Semaphore(1);
 
     public RecommenderService(DataManager dataManager) {
         this.dataManager = dataManager;
@@ -41,8 +42,14 @@ public class RecommenderService {
                     if (otherUserIdx != userIdx) {
                         double similarity = calculateCosineSimilarity(userRatings, entry.getValue());
                         if (similarity > 0) {
-                            synchronized (lock) {
+                            try {
+                                semaphore.acquire();
                                 similarities.put(otherUserIdx, similarity);
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                                e.printStackTrace();
+                            } finally {
+                                semaphore.release();
                             }
                         }
                     }
