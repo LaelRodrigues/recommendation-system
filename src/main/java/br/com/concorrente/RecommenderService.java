@@ -1,12 +1,11 @@
 package br.com.concorrente;
 
 import java.util.*;
-import java.util.concurrent.Semaphore;
 
 public class RecommenderService {
     private DataManager dataManager;
     private static final int NUM_THREADS = 20; // Número de threads a serem usadas
-    private final Semaphore semaphore = new Semaphore(1);
+    private volatile Map<Integer, Double> similarities = new HashMap<>();
 
     public RecommenderService(DataManager dataManager) {
         this.dataManager = dataManager;
@@ -25,7 +24,6 @@ public class RecommenderService {
         Map<Integer, Double> userRatings = ratingsMatrix.getOrDefault(userIdx, new HashMap<>());
 
         List<Thread> threads = new ArrayList<>();
-        Map<Integer, Double> similarities = new HashMap<>();
 
         List<Map.Entry<Integer, Map<Integer, Double>>> entries = new ArrayList<>(ratingsMatrix.entrySet());
         int numEntries = entries.size();
@@ -36,24 +34,19 @@ public class RecommenderService {
             int endIdx = (i == NUM_THREADS - 1) ? numEntries : (i + 1) * chunkSize;
 
             Thread thread = Thread.ofPlatform().start(() -> {
+                Map<Integer, Double> localSimilarities = new HashMap<>();
                 for (int j = startIdx; j < endIdx; j++) {
                     Map.Entry<Integer, Map<Integer, Double>> entry = entries.get(j);
                     int otherUserIdx = entry.getKey();
                     if (otherUserIdx != userIdx) {
                         double similarity = calculateCosineSimilarity(userRatings, entry.getValue());
                         if (similarity > 0) {
-                            try {
-                                semaphore.acquire();
-                                similarities.put(otherUserIdx, similarity);
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                                e.printStackTrace();
-                            } finally {
-                                semaphore.release();
-                            }
+                            localSimilarities.put(otherUserIdx, similarity);
                         }
                     }
                 }
+                // Atualiza as similaridades de forma atômica
+                updateSimilarities(localSimilarities);
             });
             threads.add(thread);
         }
@@ -107,5 +100,9 @@ public class RecommenderService {
         }
 
         return dotProduct / (Math.sqrt(normVector1) * Math.sqrt(normVector2));
+    }
+
+    private void updateSimilarities(Map<Integer, Double> localSimilarities) {
+        similarities.putAll(localSimilarities);
     }
 }
