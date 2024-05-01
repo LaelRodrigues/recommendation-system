@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class Main {
 
-    public static final int NUM_THREADS = 3;
+    public static final int NUM_THREADS = 4;
 
     public static void main(String[] args) throws IOException {
 

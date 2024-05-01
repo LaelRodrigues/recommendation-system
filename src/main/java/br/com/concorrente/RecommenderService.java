@@ -5,7 +5,7 @@ import java.util.concurrent.Semaphore;
 
 public class RecommenderService {
     private DataManager dataManager;
-    private static final int NUM_THREADS = 20; // Número de threads a serem usadas
+    private static final int NUM_THREADS = 4;
     private final Semaphore semaphore = new Semaphore(1);
 
     public RecommenderService(DataManager dataManager) {
