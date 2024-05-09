@@ -79,18 +79,18 @@ public class DataManager implements Runnable {
     }
 
     public Map<String, Integer> getUserIdToIdx() {
-        return userIdToIdx;
+        return Map.copyOf(userIdToIdx);
     }
 
     public Map<String, Integer> getBookTitleToIdx() {
-        return bookTitleToIdx;
+        return Map.copyOf(bookTitleToIdx);
     }
 
     public List<String> getBookTitles() {
-        return bookTitles;
+        return Collections.unmodifiableList(bookTitles);
     }
 
     public Map<Integer, Map<Integer, Double>> getRatingsMatrix() {
-        return ratingsMatrix;
+        return Map.copyOf(ratingsMatrix);
     }
 }
