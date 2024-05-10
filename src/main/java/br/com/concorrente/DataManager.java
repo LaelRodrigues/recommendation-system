@@ -79,11 +79,11 @@ public class DataManager implements Runnable {
     }
 
     public Map<String, Integer> getUserIdToIdx() {
-        return Map.copyOf(userIdToIdx);
+        return Collections.unmodifiableMap(userIdToIdx);
     }
 
     public Map<String, Integer> getBookTitleToIdx() {
-        return Map.copyOf(bookTitleToIdx);
+        return Collections.unmodifiableMap(bookTitleToIdx);
     }
 
     public List<String> getBookTitles() {
@@ -91,6 +91,6 @@ public class DataManager implements Runnable {
     }
 
     public Map<Integer, Map<Integer, Double>> getRatingsMatrix() {
-        return Map.copyOf(ratingsMatrix);
+        return Collections.unmodifiableMap(ratingsMatrix);
     }
 }
