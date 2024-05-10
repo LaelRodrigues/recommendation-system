@@ -4,8 +4,8 @@ import java.util.*;
 
 public class RecommenderService {
     private DataManager dataManager;
-    private static final int NUM_THREADS = 4; // Número de threads a serem usadas
-    private final Object lock = new Object();
+    private static final int NUM_THREADS = 4; 
+    private final ThreadLocal<Map<Integer, Double>> threadLocalSimilarities = ThreadLocal.withInitial(HashMap::new);
 
     public RecommenderService(DataManager dataManager) {
         this.dataManager = dataManager;
@@ -24,7 +24,6 @@ public class RecommenderService {
         Map<Integer, Double> userRatings = ratingsMatrix.getOrDefault(userIdx, new HashMap<>());
 
         List<Thread> threads = new ArrayList<>();
-        Map<Integer, Double> similarities = new HashMap<>();
 
         List<Map.Entry<Integer, Map<Integer, Double>>> entries = new ArrayList<>(ratingsMatrix.entrySet());
         int numEntries = entries.size();
@@ -35,15 +34,14 @@ public class RecommenderService {
             int endIdx = (i == NUM_THREADS - 1) ? numEntries : (i + 1) * chunkSize;
 
             Thread thread = Thread.ofPlatform().start(() -> {
+                Map<Integer, Double> similarities = threadLocalSimilarities.get();
                 for (int j = startIdx; j < endIdx; j++) {
                     Map.Entry<Integer, Map<Integer, Double>> entry = entries.get(j);
                     int otherUserIdx = entry.getKey();
                     if (otherUserIdx != userIdx) {
                         double similarity = calculateCosineSimilarity(userRatings, entry.getValue());
                         if (similarity > 0) {
-                            synchronized (lock) {
-                                similarities.put(otherUserIdx, similarity);
-                            }
+                            similarities.put(otherUserIdx, similarity);
                         }
                     }
                 }
@@ -60,7 +58,7 @@ public class RecommenderService {
             }
         }
 
-        List<Map.Entry<Integer, Double>> similarUsers = new ArrayList<>(similarities.entrySet());
+        List<Map.Entry<Integer, Double>> similarUsers = new ArrayList<>(threadLocalSimilarities.get().entrySet());
         similarUsers.sort((e1, e2) -> Double.compare(e2.getValue(), e1.getValue()));
 
         List<Map.Entry<String, Double>> recommendedBooks = new ArrayList<>();
