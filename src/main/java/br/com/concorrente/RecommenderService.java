@@ -1,11 +1,12 @@
 package br.com.concorrente;
 
 import java.util.*;
+import java.util.concurrent.*;
 
 public class RecommenderService {
     private DataManager dataManager;
-    private static final int NUM_THREADS = 4;
-    private final Map<Integer, Double> similarities = new HashMap<>();
+    private static final int NUM_THREADS = 8;
+    private final Map<Integer, Double> similarities = new ConcurrentHashMap<>();
 
     public RecommenderService(DataManager dataManager) {
         this.dataManager = dataManager;
@@ -23,7 +24,7 @@ public class RecommenderService {
 
         Map<Integer, Double> userRatings = ratingsMatrix.getOrDefault(userIdx, new HashMap<>());
 
-        List<Thread> threads = new ArrayList<>();
+        ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
 
         List<Map.Entry<Integer, Map<Integer, Double>>> entries = new ArrayList<>(ratingsMatrix.entrySet());
         int numEntries = entries.size();
@@ -33,36 +34,29 @@ public class RecommenderService {
             int startIdx = i * chunkSize;
             int endIdx = (i == NUM_THREADS - 1) ? numEntries : (i + 1) * chunkSize;
 
-            Thread thread = Thread.ofPlatform().start(() -> {
+            executor.submit(() -> {
                 for (int j = startIdx; j < endIdx; j++) {
                     Map.Entry<Integer, Map<Integer, Double>> entry = entries.get(j);
                     int otherUserIdx = entry.getKey();
                     if (otherUserIdx != userIdx) {
                         double similarity = calculateCosineSimilarity(userRatings, entry.getValue());
                         if (similarity > 0) {
-                            synchronized (similarities) {
-                                similarities.put(otherUserIdx, similarity);
-                            }
+                            similarities.put(otherUserIdx, similarity);
                         }
                     }
                 }
             });
-            threads.add(thread);
         }
 
-        for (Thread thread : threads) {
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                e.printStackTrace();
-            }
+        executor.shutdown();
+        try {
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            e.printStackTrace();
         }
 
-        List<Map.Entry<Integer, Double>> similarUsers;
-        synchronized (similarities) {
-            similarUsers = new ArrayList<>(similarities.entrySet());
-        }
+        List<Map.Entry<Integer, Double>> similarUsers = new ArrayList<>(similarities.entrySet());
         similarUsers.sort((e1, e2) -> Double.compare(e2.getValue(), e1.getValue()));
 
         List<Map.Entry<String, Double>> recommendedBooks = new ArrayList<>();
