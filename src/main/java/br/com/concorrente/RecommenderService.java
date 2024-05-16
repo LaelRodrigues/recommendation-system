@@ -5,8 +5,8 @@ import java.util.concurrent.*;
 
 public class RecommenderService {
     private DataManager dataManager;
-    private static final int NUM_THREADS = 8;
-    private final Map<Integer, Double> similarities = new ConcurrentHashMap<>();
+    private static final int NUM_THREADS = 4;
+    private final Map<Integer, Double> similarities = new HashMap<>();
 
     public RecommenderService(DataManager dataManager) {
         this.dataManager = dataManager;
@@ -25,6 +25,7 @@ public class RecommenderService {
         Map<Integer, Double> userRatings = ratingsMatrix.getOrDefault(userIdx, new HashMap<>());
 
         ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
+        List<Callable<Map<Integer, Double>>> callables = new ArrayList<>();
 
         List<Map.Entry<Integer, Map<Integer, Double>>> entries = new ArrayList<>(ratingsMatrix.entrySet());
         int numEntries = entries.size();
@@ -34,25 +35,46 @@ public class RecommenderService {
             int startIdx = i * chunkSize;
             int endIdx = (i == NUM_THREADS - 1) ? numEntries : (i + 1) * chunkSize;
 
-            executor.submit(() -> {
-                for (int j = startIdx; j < endIdx; j++) {
-                    Map.Entry<Integer, Map<Integer, Double>> entry = entries.get(j);
-                    int otherUserIdx = entry.getKey();
-                    if (otherUserIdx != userIdx) {
-                        double similarity = calculateCosineSimilarity(userRatings, entry.getValue());
-                        if (similarity > 0) {
-                            similarities.put(otherUserIdx, similarity);
+            callables.add(new Callable<Map<Integer, Double>>() {
+                @Override
+                public Map<Integer, Double> call() {
+                    Map<Integer, Double> threadSimilarities = new HashMap<>();
+                    for (int j = startIdx; j < endIdx; j++) {
+                        Map.Entry<Integer, Map<Integer, Double>> entry = entries.get(j);
+                        int otherUserIdx = entry.getKey();
+                        if (otherUserIdx != userIdx) {
+                            double similarity = calculateCosineSimilarity(userRatings, entry.getValue());
+                            if (similarity > 0) {
+                                threadSimilarities.put(otherUserIdx, similarity);
+                            }
                         }
                     }
+                    return threadSimilarities;
                 }
             });
         }
 
-        executor.shutdown();
+        List<Future<Map<Integer, Double>>> futures = new ArrayList<>();
+
         try {
-            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            futures = executor.invokeAll(callables);
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+            e.printStackTrace();
+        }
+
+        for (Future<Map<Integer, Double>> future : futures) {
+            try {
+                similarities.putAll(future.get());
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+
+        executor.shutdown();
+
+        try {
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
