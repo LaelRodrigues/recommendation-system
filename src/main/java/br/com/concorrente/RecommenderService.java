@@ -6,7 +6,7 @@ import java.util.concurrent.*;
 public class RecommenderService {
     private DataManager dataManager;
     private static final int NUM_THREADS = 8;
-    private final Map<Integer, Double> similarities = new ConcurrentHashMap<>();
+    private final Map<Integer, Double> similarities = new HashMap<>();
 
     public RecommenderService(DataManager dataManager) {
         this.dataManager = dataManager;
