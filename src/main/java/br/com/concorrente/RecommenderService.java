@@ -23,8 +23,6 @@ public class RecommenderService {
 
         Map<Integer, Double> userRatings = ratingsMatrix.getOrDefault(userIdx, new HashMap<>());
 
-        System.out.println("tamanho matrix: " + ratingsMatrix.size());
-
         List<Map.Entry<Integer, Double>> similarUsers;
         try (ForkJoinPool forkJoinPool = new ForkJoinPool()) {
             similarUsers = forkJoinPool
