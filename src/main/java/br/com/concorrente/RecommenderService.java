@@ -1,6 +1,7 @@
 package br.com.concorrente;
 
 import java.util.*;
+import java.util.concurrent.*;
 
 public class RecommenderService {
     private DataManager dataManager;
@@ -23,17 +24,17 @@ public class RecommenderService {
 
         Map<Integer, Double> userRatings = ratingsMatrix.getOrDefault(userIdx, new HashMap<>());
 
-        List<Thread> threads = new ArrayList<>();
-
         List<Map.Entry<Integer, Map<Integer, Double>>> entries = new ArrayList<>(ratingsMatrix.entrySet());
         int numEntries = entries.size();
         int chunkSize = numEntries / NUM_THREADS;
+
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
 
         for (int i = 0; i < NUM_THREADS; i++) {
             int startIdx = i * chunkSize;
             int endIdx = (i == NUM_THREADS - 1) ? numEntries : (i + 1) * chunkSize;
 
-            Thread thread = Thread.ofPlatform().start(() -> {
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                 for (int j = startIdx; j < endIdx; j++) {
                     Map.Entry<Integer, Map<Integer, Double>> entry = entries.get(j);
                     int otherUserIdx = entry.getKey();
@@ -46,18 +47,16 @@ public class RecommenderService {
                         }
                     }
                 }
+            }).exceptionally(ex -> {
+                ex.printStackTrace();
+                return null;
             });
-            threads.add(thread);
+
+            futures.add(future);
         }
 
-        for (Thread thread : threads) {
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                e.printStackTrace();
-            }
-        }
+        CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        allOf.join();
 
         List<Map.Entry<Integer, Double>> similarUsers;
         synchronized (similarities) {
