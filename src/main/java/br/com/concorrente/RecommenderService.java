@@ -5,7 +5,7 @@ import java.util.concurrent.*;
 
 public class RecommenderService {
     private DataManager dataManager;
-    private static final int NUM_THREADS = 4;
+    private static final int CHUNK_NUM = 4;
     private final Map<Integer, Double> similarities = new HashMap<>();
 
     public RecommenderService(DataManager dataManager) {
@@ -26,13 +26,13 @@ public class RecommenderService {
 
         List<Map.Entry<Integer, Map<Integer, Double>>> entries = new ArrayList<>(ratingsMatrix.entrySet());
         int numEntries = entries.size();
-        int chunkSize = numEntries / NUM_THREADS;
+        int chunkSize = numEntries / CHUNK_NUM;
 
         List<CompletableFuture<Void>> futures = new ArrayList<>();
 
-        for (int i = 0; i < NUM_THREADS; i++) {
+        for (int i = 0; i < CHUNK_NUM; i++) {
             int startIdx = i * chunkSize;
-            int endIdx = (i == NUM_THREADS - 1) ? numEntries : (i + 1) * chunkSize;
+            int endIdx = (i == CHUNK_NUM - 1) ? numEntries : (i + 1) * chunkSize;
 
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                 for (int j = startIdx; j < endIdx; j++) {
