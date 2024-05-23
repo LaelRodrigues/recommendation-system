@@ -1,11 +1,10 @@
 package br.com.concorrente;
 
 import java.util.*;
-import java.util.concurrent.*;
 
 public class RecommenderService {
     private DataManager dataManager;
-    private static final int NUM_THREADS = 4;
+    private static final int CHUNK_NUM = 4;
     private final Map<Integer, Double> similarities = new HashMap<>();
 
     public RecommenderService(DataManager dataManager) {
@@ -26,42 +25,31 @@ public class RecommenderService {
 
         List<Map.Entry<Integer, Map<Integer, Double>>> entries = new ArrayList<>(ratingsMatrix.entrySet());
         int numEntries = entries.size();
-        int chunkSize = numEntries / NUM_THREADS;
+        int chunkSize = numEntries / CHUNK_NUM;
 
-        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        List<List<Map.Entry<Integer, Map<Integer, Double>>>> chunks = new ArrayList<>();
 
-        for (int i = 0; i < NUM_THREADS; i++) {
+        for (int i = 0; i < CHUNK_NUM; i++) {
             int startIdx = i * chunkSize;
-            int endIdx = (i == NUM_THREADS - 1) ? numEntries : (i + 1) * chunkSize;
+            int endIdx = (i == CHUNK_NUM - 1) ? numEntries : (i + 1) * chunkSize;
+            chunks.add(entries.subList(startIdx, endIdx));
+        }
 
-            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-                for (int j = startIdx; j < endIdx; j++) {
-                    Map.Entry<Integer, Map<Integer, Double>> entry = entries.get(j);
-                    int otherUserIdx = entry.getKey();
-                    if (otherUserIdx != userIdx) {
-                        double similarity = calculateCosineSimilarity(userRatings, entry.getValue());
-                        if (similarity > 0) {
-                            synchronized (similarities) {
-                                similarities.put(otherUserIdx, similarity);
-                            }
+        chunks.parallelStream().forEach(chunk -> {
+            chunk.forEach(entry -> {
+                int otherUserIdx = entry.getKey();
+                if (otherUserIdx != userIdx) {
+                    double similarity = calculateCosineSimilarity(userRatings, entry.getValue());
+                    if (similarity > 0) {
+                        synchronized (similarities) {
+                            similarities.put(otherUserIdx, similarity);
                         }
                     }
                 }
-            }).exceptionally(ex -> {
-                ex.printStackTrace();
-                return null;
             });
+        });
 
-            futures.add(future);
-        }
-
-        CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
-        allOf.join();
-
-        List<Map.Entry<Integer, Double>> similarUsers;
-        synchronized (similarities) {
-            similarUsers = new ArrayList<>(similarities.entrySet());
-        }
+        List<Map.Entry<Integer, Double>> similarUsers = new ArrayList<>(similarities.entrySet());
         similarUsers.sort((e1, e2) -> Double.compare(e2.getValue(), e1.getValue()));
 
         List<Map.Entry<String, Double>> recommendedBooks = new ArrayList<>();
