@@ -12,7 +12,6 @@ public class ProcessReq {
     public List<Map.Entry<String, Double>> ProcessDataReq(String user, int numRecomendations) {
 
         try {
-            System.err.println("aaaa");
             String caminhoArquivo = "src/main/resources/teste2.csv";
 
             File file = new File(caminhoArquivo);
@@ -59,7 +58,6 @@ public class ProcessReq {
 
                 RecommenderService recommenderService = new RecommenderService(combinedData);
                 List<Map.Entry<String, Double>> result = recommenderService.recommendBooks(user, numRecomendations);
-                System.err.println("bbbb");
                 return result;
             } else {
                 System.out.println("O arquivo especificado não existe ou não é válido.");
