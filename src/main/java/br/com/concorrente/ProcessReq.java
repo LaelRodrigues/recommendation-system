@@ -12,7 +12,6 @@ public class ProcessReq {
     public List<Map.Entry<String, Double>> ProcessDataReq(String user, int numRecomendations) {
 
         try {
-            System.err.println("aaaa");
             String caminhoArquivo = "src/main/resources/teste2.csv";
 
             File file = new File(caminhoArquivo);

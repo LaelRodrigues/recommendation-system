@@ -16,11 +16,8 @@ public class TCPServerPerConnection {
 		}
 		while (true) {
 			try {
-				System.err.println("passei aqui 1");
 				TrataReq tratador = new TrataReq(server.accept());
-				System.err.println("passei aqui 2");
 				tratador.start();
-				System.err.println("passei aqui 3");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
