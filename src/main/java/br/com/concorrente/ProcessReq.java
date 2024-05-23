@@ -58,7 +58,6 @@ public class ProcessReq {
 
                 RecommenderService recommenderService = new RecommenderService(combinedData);
                 List<Map.Entry<String, Double>> result = recommenderService.recommendBooks(user, numRecomendations);
-                System.err.println("bbbb");
                 return result;
             } else {
                 System.out.println("O arquivo especificado não existe ou não é válido.");
