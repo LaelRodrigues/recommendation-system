@@ -49,7 +49,7 @@ public class RecommenderService {
                 });
             }
 
-            scope.join(); // Wait for all tasks to complete
+            scope.join();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             e.printStackTrace();
