@@ -1,11 +1,13 @@
 package br.com.concorrente;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.StructuredTaskScope;
 
 public class RecommenderService {
     private DataManager dataManager;
     private static final int NUM_THREADS = 4;
-    private final Map<Integer, Double> similarities = new HashMap<>();
+    private final Map<Integer, Double> similarities = new ConcurrentHashMap<>();
 
     public RecommenderService(DataManager dataManager) {
         this.dataManager = dataManager;
@@ -23,40 +25,34 @@ public class RecommenderService {
 
         Map<Integer, Double> userRatings = ratingsMatrix.getOrDefault(userIdx, new HashMap<>());
 
-        List<Thread> threads = new ArrayList<>();
-
         List<Map.Entry<Integer, Map<Integer, Double>>> entries = new ArrayList<>(ratingsMatrix.entrySet());
         int numEntries = entries.size();
         int chunkSize = numEntries / NUM_THREADS;
 
-        for (int i = 0; i < NUM_THREADS; i++) {
-            int startIdx = i * chunkSize;
-            int endIdx = (i == NUM_THREADS - 1) ? numEntries : (i + 1) * chunkSize;
+        try (var scope = new StructuredTaskScope<Void>()) {
+            for (int i = 0; i < NUM_THREADS; i++) {
+                int startIdx = i * chunkSize;
+                int endIdx = (i == NUM_THREADS - 1) ? numEntries : (i + 1) * chunkSize;
 
-            Thread thread = Thread.ofPlatform().start(() -> {
-                for (int j = startIdx; j < endIdx; j++) {
-                    Map.Entry<Integer, Map<Integer, Double>> entry = entries.get(j);
-                    int otherUserIdx = entry.getKey();
-                    if (otherUserIdx != userIdx) {
-                        double similarity = calculateCosineSimilarity(userRatings, entry.getValue());
-                        if (similarity > 0) {
-                            synchronized (similarities) {
+                scope.fork(() -> {
+                    for (int j = startIdx; j < endIdx; j++) {
+                        Map.Entry<Integer, Map<Integer, Double>> entry = entries.get(j);
+                        int otherUserIdx = entry.getKey();
+                        if (otherUserIdx != userIdx) {
+                            double similarity = calculateCosineSimilarity(userRatings, entry.getValue());
+                            if (similarity > 0) {
                                 similarities.put(otherUserIdx, similarity);
                             }
                         }
                     }
-                }
-            });
-            threads.add(thread);
-        }
-
-        for (Thread thread : threads) {
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                e.printStackTrace();
+                    return null;
+                });
             }
+
+            scope.join(); // Wait for all tasks to complete
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            e.printStackTrace();
         }
 
         List<Map.Entry<Integer, Double>> similarUsers;

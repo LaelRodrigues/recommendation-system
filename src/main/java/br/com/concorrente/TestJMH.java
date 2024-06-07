@@ -11,7 +11,6 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 public class TestJMH {
     public static void main(String[] args) throws RunnerException, IOException {
-
         Options opt = new OptionsBuilder()
                 .include(SetupJMH.class.getSimpleName())
                 .warmupIterations(5)
