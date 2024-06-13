@@ -16,3 +16,8 @@ src/main/resources/
 
 # Arquivos de configuração do Visual Studio Code
 .vscode/
+.classpath
+.project
+
+*jar
+*jfr

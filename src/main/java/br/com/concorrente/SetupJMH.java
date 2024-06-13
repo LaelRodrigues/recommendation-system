@@ -13,7 +13,7 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 
 @State(Scope.Benchmark)
-@BenchmarkMode(Mode.AverageTime)
+@BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.SECONDS)
 public class SetupJMH {
 
@@ -27,7 +27,7 @@ public class SetupJMH {
     @Setup
     public void setup() {
 
-        String caminhoArquivo = "src/main/resources/teste3.csv";
+        String caminhoArquivo = "src/main/resources/teste2.csv";
 
         File file = new File(caminhoArquivo);
 
