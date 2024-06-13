@@ -12,7 +12,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 
-        String caminhoArquivo = "src/main/resources/teste3.csv";
+        String caminhoArquivo = "src/main/resources/teste2.csv";
 
         File file = new File(caminhoArquivo);
 

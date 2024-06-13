@@ -29,7 +29,7 @@ public class RecommenderService {
         int numEntries = entries.size();
         int chunkSize = numEntries / NUM_THREADS;
 
-        try (var scope = new StructuredTaskScope<Void>()) {
+        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             for (int i = 0; i < NUM_THREADS; i++) {
                 int startIdx = i * chunkSize;
                 int endIdx = (i == NUM_THREADS - 1) ? numEntries : (i + 1) * chunkSize;
