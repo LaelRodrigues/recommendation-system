@@ -18,7 +18,7 @@ public class TestJMH {
                 .measurementBatchSize(5).forks(1)
                 .addProfiler(GCProfiler.class)
                 .addProfiler(StackProfiler.class)
-                .jvmArgs("-server", "-Xms4G", "-Xmx4G").build();
+                .jvmArgs("-server", "-Xms6G", "-Xmx6G").build();
 
         new Runner(opt).run();
     }
