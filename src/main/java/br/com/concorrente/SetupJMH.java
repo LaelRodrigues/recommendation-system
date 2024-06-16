@@ -17,7 +17,7 @@ import org.openjdk.jmh.annotations.State;
 @OutputTimeUnit(TimeUnit.SECONDS)
 public class SetupJMH {
 
-    private static final int K_VALUE = 5;
+    private static final int K_VALUE = 1;
 
     private RecommenderService recommenderService;
 
@@ -27,7 +27,7 @@ public class SetupJMH {
     @Setup
     public void setup() {
 
-        String caminhoArquivo = "src/main/resources/teste2.csv";
+        String caminhoArquivo = "src/main/resources/teste3.csv";
 
         File file = new File(caminhoArquivo);
 
