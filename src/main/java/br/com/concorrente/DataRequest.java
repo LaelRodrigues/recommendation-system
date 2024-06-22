@@ -4,7 +4,11 @@ import java.io.Serializable;
 
 public class DataRequest implements Serializable {
 
-    private String user;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private String user;
     private int numRecomendations;
 
     public DataRequest(String user, int numRecomendations) {
