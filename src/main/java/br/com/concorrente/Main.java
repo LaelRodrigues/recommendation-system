@@ -1,79 +1,42 @@
 package br.com.concorrente;
 
-import java.io.IOException;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.SparkConf;
+
 import java.util.Map;
-import java.io.File;
-import java.util.List;
-import java.util.ArrayList;
 
 public class Main {
 
-    public static final int NUM_THREADS = 3;
-
-    public static void main(String[] args) throws IOException {
-
+    public static void main(String[] args) {
         String caminhoArquivo = "src/main/resources/teste2.csv";
 
-        File file = new File(caminhoArquivo);
+        SparkConf conf = new SparkConf().setAppName("RecomendacaoDeLivros")
+                .setMaster("local[*]");
 
-        if (file.exists() && file.isFile()) {
+        JavaSparkContext sc = new JavaSparkContext(conf);
 
-            long tamanhoArquivo = file.length();
+        JavaRDD<String> csvData = sc.textFile(caminhoArquivo);
 
-            long parte = tamanhoArquivo / NUM_THREADS;
+        // long startTime = System.currentTimeMillis();
 
-            DataManager[] parts = new DataManager[NUM_THREADS];
+        // DataManager dataManager = new DataManager(csvData);
 
-            long inicioParte = 0;
-            long fimParte = parte;
+        // long endTime = System.currentTimeMillis();
 
-            for (int i = 0; i < NUM_THREADS; i++) {
-                parts[i] = new DataManager(caminhoArquivo, (int) inicioParte, (int) fimParte);
-                inicioParte = fimParte;
-                fimParte += parte;
-                if (i == NUM_THREADS - 2) {
-                    fimParte = tamanhoArquivo;
-                }
-            }
-            long startTime = System.currentTimeMillis();
+        // long duration = endTime - startTime;
 
-            List<Thread> threads = new ArrayList<>();
+        // System.out.println("tempo de resposta: " + duration + " em milissegundos");
 
-            for (int i = 0; i < NUM_THREADS; i++) {
-                threads.add(Thread.ofPlatform().start(parts[i]));
-            }
+        // startTime = System.currentTimeMillis();
 
-            for (Thread thread : threads) {
-                try {
-                    thread.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+        // processRecommendations(dataManager, "A3UH4UZ4RSVO82");
 
-            long endTime = System.currentTimeMillis();
+        // endTime = System.currentTimeMillis();
+        // duration = endTime - startTime;
+        // System.out.println("Tempo de resposta: " + duration + " milissegundos");
 
-            long duration = endTime - startTime;
-
-            System.out.println("tempo de resposta: " + duration + " em milissegundos");
-
-            DataManager combinedData = new DataManager();
-
-            for (int i = 0; i < NUM_THREADS; i++) {
-                combinedData.mergeData(parts[i]);
-            }
-
-            startTime = System.currentTimeMillis();
-
-            processRecommendations(combinedData, "A3UH4UZ4RSVO82");
-
-            endTime = System.currentTimeMillis();
-            duration = endTime - startTime;
-            System.out.println("Tempo de resposta: " + duration + " milissegundos");
-
-        } else {
-            System.out.println("O arquivo especificado não existe ou não é válido.");
-        }
+        // sc.close();
     }
 
     private static void processRecommendations(DataManager dataManager, String userId) {
