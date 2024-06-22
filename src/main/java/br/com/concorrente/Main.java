@@ -1,8 +1,8 @@
 package br.com.concorrente;
 
+import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.SparkConf;
 
 import java.util.Map;
 
@@ -18,25 +18,25 @@ public class Main {
 
         JavaRDD<String> csvData = sc.textFile(caminhoArquivo);
 
-        // long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
 
-        // DataManager dataManager = new DataManager(csvData);
+        DataManager dataManager = new DataManager(csvData);
 
-        // long endTime = System.currentTimeMillis();
+        long endTime = System.currentTimeMillis();
 
-        // long duration = endTime - startTime;
+        long duration = endTime - startTime;
+	
+        System.out.println("tempo de resposta: " + duration + " em milissegundos");
+	
+        startTime = System.currentTimeMillis();
 
-        // System.out.println("tempo de resposta: " + duration + " em milissegundos");
+        processRecommendations(dataManager, "A3UH4UZ4RSVO82");
 
-        // startTime = System.currentTimeMillis();
-
-        // processRecommendations(dataManager, "A3UH4UZ4RSVO82");
-
-        // endTime = System.currentTimeMillis();
-        // duration = endTime - startTime;
-        // System.out.println("Tempo de resposta: " + duration + " milissegundos");
-
-        // sc.close();
+        endTime = System.currentTimeMillis();
+        duration = endTime - startTime;
+        System.out.println("Tempo de resposta: " + duration + " milissegundos");
+        
+        sc.close();
     }
 
     private static void processRecommendations(DataManager dataManager, String userId) {

@@ -1,6 +1,7 @@
 package br.com.concorrente;
 
 import org.apache.spark.api.java.JavaRDD;
+
 import java.util.*;
 
 public class DataManager {
@@ -21,11 +22,24 @@ public class DataManager {
         List<String> lines = data.collect();
         int userIndex = 0;
         int bookIndex = 0;
+        
         for (String line : lines) {
             String[] parts = line.split(",");
+            if (parts.length < 3) {
+                continue; 
+            }
             String userId = parts[0];
-            double rating = Double.parseDouble(parts[1]);
+            String ratingStr = parts[1];
             String bookTitle = parts[2];
+            Double rating;
+            
+            try {
+                rating = Double.parseDouble(ratingStr);
+            } catch (NumberFormatException e) {
+                System.err.println("Erro ao converter para Double: " + e.getMessage());
+                rating = 0.0;
+            }
+            
             if (!userIdToIdx.containsKey(userId)) {
                 userIdToIdx.put(userId, userIndex);
                 userIndex++;
