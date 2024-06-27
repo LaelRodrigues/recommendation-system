@@ -29,13 +29,13 @@ public class Main {
 	
         System.out.println("tempo de resposta: " + duration + " em milissegundos");
 	
-        startTime = System.currentTimeMillis();
+//        startTime = System.currentTimeMillis();
 
-        processRecommendations(dataManager, "A3UH4UZ4RSVO82");
-
-        endTime = System.currentTimeMillis();
-        duration = endTime - startTime;
-        System.out.println("Tempo de resposta: " + duration + " milissegundos");
+//        processRecommendations(dataManager, "A3UH4UZ4RSVO82");
+//
+//        endTime = System.currentTimeMillis();
+//        duration = endTime - startTime;
+//        System.out.println("Tempo de resposta: " + duration + " milissegundos");
         
 
         try {
