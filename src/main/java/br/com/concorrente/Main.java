@@ -14,7 +14,7 @@ public class Main {
     public static void main(String[] args) throws InterruptedException {
     	String caminhoArquivo = "src/main/resources/dataframe_csv_v1.csv";
 
-        SparkSession spark = SparkSession.builder()
+        SparkSession spark = SparkSession.builder()	
                 .appName("RecomendacaoDeLivros")
                 .master("local[*]")
                 .getOrCreate();
