@@ -26,29 +26,22 @@ public class DataManager {
 
         for (Row row : rows) {
             String userId = row.getString(0);
-            String ratingStr = row.getString(1);
+            Double rating = row.getDouble(1);
             String bookTitle = row.getString(2);
-            Double rating;
 
-//            try {
-//                rating = Double.parseDouble(ratingStr);
-//            } catch (NumberFormatException e) {
-//                System.err.println("Erro ao converter para Double: " + e.getMessage());
-//                rating = 0.0;
-//            }
-//
-//            if (!userIdToIdx.containsKey(userId)) {
-//                userIdToIdx.put(userId, userIndex);
-//                userIndex++;
-//            }
-//            if (!bookTitleToIdx.containsKey(bookTitle)) {
-//                bookTitleToIdx.put(bookTitle, bookIndex);
-//                bookTitles.add(bookTitle);
-//                bookIndex++;
-//            }
-//            int userIdx = userIdToIdx.get(userId);
-//            int bookIdx = bookTitleToIdx.get(bookTitle);
-//            ratingsMatrix.computeIfAbsent(userIdx, k -> new HashMap<>()).put(bookIdx, rating);
+
+            if (!userIdToIdx.containsKey(userId)) {
+                userIdToIdx.put(userId, userIndex);
+                userIndex++;
+            }
+            if (!bookTitleToIdx.containsKey(bookTitle)) {
+                bookTitleToIdx.put(bookTitle, bookIndex);
+                bookTitles.add(bookTitle);
+                bookIndex++;
+            }
+            int userIdx = userIdToIdx.get(userId);
+            int bookIdx = bookTitleToIdx.get(bookTitle);
+            ratingsMatrix.computeIfAbsent(userIdx, k -> new HashMap<>()).put(bookIdx, rating);
         }
     }
 

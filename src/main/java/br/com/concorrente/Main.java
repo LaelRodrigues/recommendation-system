@@ -1,50 +1,64 @@
 package br.com.concorrente;
 
-import org.apache.spark.SparkConf;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.sql.types.StructField;
+import org.apache.spark.sql.types.StructType;
 
 import java.util.Map;
 
 public class Main {
 
     public static void main(String[] args) {
-    	String caminhoArquivo = "src/main/resources/teste3.csv";
+    	String caminhoArquivo = "src/main/resources/dataframe_csv_v1.csv";
 
-        SparkConf conf = new SparkConf().setAppName("RecomendacaoDeLivros")
-                .setMaster("local[*]");
+        SparkSession spark = SparkSession.builder()
+                .appName("RecomendacaoDeLivros")
+                .master("local[*]")
+                .getOrCreate();
+        
+        StructType schema = DataTypes.createStructType(new StructField[] {
+        		DataTypes.createStructField(
+        				"user_id", 
+        				DataTypes.StringType, 
+        				false),
+          		DataTypes.createStructField(
+        				"rating", 
+        				DataTypes.DoubleType, 
+        				false),
+          		DataTypes.createStructField(
+        				"book_id", 
+        				DataTypes.StringType, 
+        				false), });
+        
 
-        SparkSession spark = SparkSession.builder().config(conf).getOrCreate();
+        Dataset<Row> df = spark.read().format("csv")
+        		.option("header", "true")
+        		.option("multiline", "true")
+        		.option("sep", ",")
+        		.option("quote", "\"")
+        		.schema(schema)
+        		.load(caminhoArquivo);
+        
+        df.show(5); 
+        
 
-        Dataset<Row> csvData = spark.read().option("header", "true").csv(caminhoArquivo);
 
         long startTime = System.currentTimeMillis();
+        
 
-        DataManager dataManager = new DataManager(csvData);
+        DataManager dataManager = new DataManager(df);
 
         long endTime = System.currentTimeMillis();
 
         long duration = endTime - startTime;
 	
-        System.out.println("tempo de resposta: " + duration + " em milissegundos");
-	
-//        startTime = System.currentTimeMillis();
+        System.out.println("tempo de resposta: " + duration + " milissegundos");
 
-//        processRecommendations(dataManager, "A3UH4UZ4RSVO82");
-//
-//        endTime = System.currentTimeMillis();
-//        duration = endTime - startTime;
-//        System.out.println("Tempo de resposta: " + duration + " milissegundos");
-        
+        processRecommendations(dataManager, "A3UH4UZ4RSVO82");
 
-        try {
-            Thread.sleep(60000);
-        } catch (InterruptedException e) {
-            System.out.println("Sleep was interrupted!");
-        }
-
-        
         spark.close();
     }
 
