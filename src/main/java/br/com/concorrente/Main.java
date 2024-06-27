@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
     	String caminhoArquivo = "src/main/resources/dataframe_csv_v1.csv";
 
         SparkSession spark = SparkSession.builder()
@@ -58,6 +58,8 @@ public class Main {
         System.out.println("tempo de resposta: " + duration + " milissegundos");
 
         processRecommendations(dataManager, "A3UH4UZ4RSVO82");
+        
+        Thread.sleep(60000);
 
         spark.close();
     }
