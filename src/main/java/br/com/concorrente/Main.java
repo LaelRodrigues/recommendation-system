@@ -47,7 +47,7 @@ public class Main {
         
         spark.udf().register("ratingCategory", (UDF1<Double, String>) rating -> {
             if (rating == null) return "Unknown";
-            return rating > 4.0 ? "High" : "Low";
+            return rating >= 4.1 ? "High" : "Low";
         }, DataTypes.StringType);
         
         df = df.withColumn("rating_category", functions.callUDF("ratingCategory", df.col("rating")));
