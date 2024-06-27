@@ -1,6 +1,7 @@
 package br.com.concorrente;
 
-import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 
 import java.util.*;
 
@@ -10,7 +11,7 @@ public class DataManager {
     private List<String> bookTitles;
     private Map<Integer, Map<Integer, Double>> ratingsMatrix;
 
-    public DataManager(JavaRDD<String> data) {
+    public DataManager(Dataset<Row> data) {
         userIdToIdx = new HashMap<>();
         bookTitleToIdx = new HashMap<>();
         bookTitles = new ArrayList<>();
@@ -18,28 +19,24 @@ public class DataManager {
         processData(data);
     }
 
-    private void processData(JavaRDD<String> data) {
-        List<String> lines = data.collect();
+    private void processData(Dataset<Row> data) {
+        List<Row> rows = data.collectAsList();
         int userIndex = 0;
         int bookIndex = 0;
-        
-        for (String line : lines) {
-            String[] parts = line.split(",");
-            if (parts.length < 3) {
-                continue; 
-            }
-            String userId = parts[0];
-            String ratingStr = parts[1];
-            String bookTitle = parts[2];
+
+        for (Row row : rows) {
+            String userId = row.getString(0);
+            String ratingStr = row.getString(1);
+            String bookTitle = row.getString(2);
             Double rating;
-            
+
             try {
                 rating = Double.parseDouble(ratingStr);
             } catch (NumberFormatException e) {
                 System.err.println("Erro ao converter para Double: " + e.getMessage());
                 rating = 0.0;
             }
-            
+
             if (!userIdToIdx.containsKey(userId)) {
                 userIdToIdx.put(userId, userIndex);
                 userIndex++;

@@ -1,22 +1,23 @@
 package br.com.concorrente;
 
 import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 
 import java.util.Map;
 
 public class Main {
 
     public static void main(String[] args) {
-        String caminhoArquivo = "src/main/resources/teste3.csv";
+    	String caminhoArquivo = "src/main/resources/teste3.csv";
 
         SparkConf conf = new SparkConf().setAppName("RecomendacaoDeLivros")
                 .setMaster("local[*]");
 
-        JavaSparkContext sc = new JavaSparkContext(conf);
+        SparkSession spark = SparkSession.builder().config(conf).getOrCreate();
 
-        JavaRDD<String> csvData = sc.textFile(caminhoArquivo);
+        Dataset<Row> csvData = spark.read().option("header", "true").csv(caminhoArquivo);
 
         long startTime = System.currentTimeMillis();
 
@@ -44,7 +45,7 @@ public class Main {
         }
 
         
-        sc.close();
+        spark.close();
     }
 
     private static void processRecommendations(DataManager dataManager, String userId) {
