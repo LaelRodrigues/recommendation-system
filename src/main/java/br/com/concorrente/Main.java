@@ -3,16 +3,19 @@ package br.com.concorrente;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.functions;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
+import org.apache.spark.sql.api.java.UDF1;
+
 
 import java.util.Map;
 
 public class Main {
 
     public static void main(String[] args) throws InterruptedException {
-    	String caminhoArquivo = "src/main/resources/dataframe_parquet_v1.parquet";
+    	String caminhoArquivo = "src/main/resources/dataframe_parquet_v2.parquet";
 
         SparkSession spark = SparkSession.builder()	
                 .appName("RecomendacaoDeLivros")
@@ -42,14 +45,28 @@ public class Main {
         		.schema(schema)
         		.load(caminhoArquivo);
         
+        spark.udf().register("ratingCategory", (UDF1<Double, String>) rating -> {
+            if (rating == null) return "Unknown";
+            return rating > 4.0 ? "High" : "Low";
+        }, DataTypes.StringType);
+        
+        df = df.withColumn("rating_category", functions.callUDF("ratingCategory", df.col("rating")));
+        
         df.show(5); 
         
-
+        df.createOrReplaceTempView("book_ratings");
+        
+        Dataset<Row> highRatingsDf = spark.sql("SELECT * FROM book_ratings WHERE rating_category = 'High'");
+        
+        highRatingsDf.show(5);
+        
+        
+        // processamento do algoritmo de recomendação
+        
 
         long startTime = System.currentTimeMillis();
         
-
-        DataManager dataManager = new DataManager(df);
+        DataManager dataManager = new DataManager(highRatingsDf);
 
         long endTime = System.currentTimeMillis();
 
