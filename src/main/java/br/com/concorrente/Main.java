@@ -9,7 +9,7 @@ import java.util.Map;
 public class Main {
 
     public static void main(String[] args) {
-        String caminhoArquivo = "src/main/resources/teste2.csv";
+        String caminhoArquivo = "src/main/resources/teste3.csv";
 
         SparkConf conf = new SparkConf().setAppName("RecomendacaoDeLivros")
                 .setMaster("local[*]");
@@ -35,6 +35,14 @@ public class Main {
         endTime = System.currentTimeMillis();
         duration = endTime - startTime;
         System.out.println("Tempo de resposta: " + duration + " milissegundos");
+        
+
+        try {
+            Thread.sleep(60000);
+        } catch (InterruptedException e) {
+            System.out.println("Sleep was interrupted!");
+        }
+
         
         sc.close();
     }
