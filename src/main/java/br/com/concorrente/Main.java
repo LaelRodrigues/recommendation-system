@@ -12,7 +12,7 @@ import java.util.Map;
 public class Main {
 
     public static void main(String[] args) throws InterruptedException {
-    	String caminhoArquivo = "src/main/resources/dataframe_csv_v1.csv";
+    	String caminhoArquivo = "src/main/resources/dataframe_parquet_v1.parquet";
 
         SparkSession spark = SparkSession.builder()	
                 .appName("RecomendacaoDeLivros")
@@ -34,7 +34,7 @@ public class Main {
         				false), });
         
 
-        Dataset<Row> df = spark.read().format("csv")
+        Dataset<Row> df = spark.read().format("parquet")
         		.option("header", "true")
         		.option("multiline", "true")
         		.option("sep", ",")
