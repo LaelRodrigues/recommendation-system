@@ -28,20 +28,20 @@ public class Main {
 	
         System.out.println("tempo de resposta: " + duration + " em milissegundos");
 	
-//        startTime = System.currentTimeMillis();
-//
-//        processRecommendations(dataManager, "A3UH4UZ4RSVO82");
-//
-//        endTime = System.currentTimeMillis();
-//        duration = endTime - startTime;
-//        System.out.println("Tempo de resposta: " + duration + " milissegundos");
-//        
+        startTime = System.currentTimeMillis();
 
-//        try {
-//            Thread.sleep(60000);
-//        } catch (InterruptedException e) {
-//            System.out.println("Sleep was interrupted!");
-//        }
+        processRecommendations(dataManager, "A3UH4UZ4RSVO82");
+
+        endTime = System.currentTimeMillis();
+        duration = endTime - startTime;
+        System.out.println("Tempo de resposta: " + duration + " milissegundos");
+        
+
+        try {
+            Thread.sleep(60000);
+        } catch (InterruptedException e) {
+            System.out.println("Sleep was interrupted!");
+        }
 
         
         sc.close();

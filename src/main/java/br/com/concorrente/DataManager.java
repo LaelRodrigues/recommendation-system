@@ -40,18 +40,18 @@ public class DataManager {
                 rating = 0.0;
             }
             
-//            if (!userIdToIdx.containsKey(userId)) {
-//                userIdToIdx.put(userId, userIndex);
-//                userIndex++;
-//            }
-//            if (!bookTitleToIdx.containsKey(bookTitle)) {
-//                bookTitleToIdx.put(bookTitle, bookIndex);
-//                bookTitles.add(bookTitle);
-//                bookIndex++;
-//            }
-//            int userIdx = userIdToIdx.get(userId);
-//            int bookIdx = bookTitleToIdx.get(bookTitle);
-//            ratingsMatrix.computeIfAbsent(userIdx, k -> new HashMap<>()).put(bookIdx, rating);
+            if (!userIdToIdx.containsKey(userId)) {
+                userIdToIdx.put(userId, userIndex);
+                userIndex++;
+            }
+            if (!bookTitleToIdx.containsKey(bookTitle)) {
+                bookTitleToIdx.put(bookTitle, bookIndex);
+                bookTitles.add(bookTitle);
+                bookIndex++;
+            }
+            int userIdx = userIdToIdx.get(userId);
+            int bookIdx = bookTitleToIdx.get(bookTitle);
+            ratingsMatrix.computeIfAbsent(userIdx, k -> new HashMap<>()).put(bookIdx, rating);
         }
     }
 
