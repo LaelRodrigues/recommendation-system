@@ -9,7 +9,9 @@ import java.util.Map;
 public class Main {
 
     public static void main(String[] args) {
-        String caminhoArquivo = "src/main/resources/dataframe_csv_v1.csv";
+    	
+    	
+        String caminhoArquivo = "src/main/resources/dataframe_csv_v2.csv";
 
         SparkConf conf = new SparkConf().setAppName("RecomendacaoDeLivros")
                 .setMaster("local[*]");
@@ -23,6 +25,8 @@ public class Main {
         long startTime = System.currentTimeMillis();
 
         DataManager dataManager = new DataManager(csvData);
+        
+        System.out.println("matriz: "+ dataManager.getRatingsMatrix());
 
         long endTime = System.currentTimeMillis();
 

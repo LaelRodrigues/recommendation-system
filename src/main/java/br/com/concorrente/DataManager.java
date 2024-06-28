@@ -2,57 +2,64 @@ package br.com.concorrente;
 
 import org.apache.spark.api.java.JavaRDD;
 
+import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class DataManager {
-    private final Map<String, Integer> userIdToIdx;
+public class DataManager implements Serializable {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private final Map<String, Integer> userIdToIdx;
     private final Map<String, Integer> bookTitleToIdx;
     private final List<String> bookTitles;
     private final Map<Integer, Map<Integer, Double>> ratingsMatrix;
+    private final AtomicInteger userIndexCounter;
+    private final AtomicInteger bookTitleCounter;
 
     public DataManager(JavaRDD<String> data) {
         userIdToIdx = new HashMap<>();
         bookTitleToIdx = new HashMap<>();
         bookTitles = new ArrayList<>();
-        ratingsMatrix = new HashMap<>();
+        ratingsMatrix = new ConcurrentHashMap<>();
+        userIndexCounter = new AtomicInteger(0);
+        bookTitleCounter = new AtomicInteger(0);
         processData(data);
     }
 
     private void processData(JavaRDD<String> data) {
-        List<String> lines = data.collect();
-        int userIndex = 0;
-        int bookIndex = 0;
-        
-        for (String line : lines) {
+        data.foreach(line -> {
             String[] parts = line.split(",");
             if (parts.length < 3) {
-                continue; 
+                System.err.println("Erro: Linha inválida: " + line);
+                return;
             }
+
             String userId = parts[0];
             String ratingStr = parts[1];
             String bookTitle = parts[2];
             Double rating;
-            
+
             try {
                 rating = Double.parseDouble(ratingStr);
             } catch (NumberFormatException e) {
                 System.err.println("Erro ao converter para Double: " + e.getMessage());
                 rating = 0.0;
             }
-            
-            if (!userIdToIdx.containsKey(userId)) {
-                userIdToIdx.put(userId, userIndex);
-                userIndex++;
-            }
-            if (!bookTitleToIdx.containsKey(bookTitle)) {
-                bookTitleToIdx.put(bookTitle, bookIndex);
+
+            int userIdx = userIdToIdx.computeIfAbsent(userId, k -> userIndexCounter.getAndIncrement());
+            int bookIdx = bookTitleToIdx.computeIfAbsent(bookTitle, k -> {
+                int index = bookTitleCounter.getAndIncrement();
                 bookTitles.add(bookTitle);
-                bookIndex++;
-            }
-            int userIdx = userIdToIdx.get(userId);
-            int bookIdx = bookTitleToIdx.get(bookTitle);
-            ratingsMatrix.computeIfAbsent(userIdx, k -> new HashMap<>()).put(bookIdx, rating);
-        }
+                return index;
+            });
+
+            ratingsMatrix.computeIfAbsent(userIdx, k -> new ConcurrentHashMap<>()).put(bookIdx, rating);
+            
+        });
+        System.out.println("tamanho da matriz depois do foreach: "+ ratingsMatrix.size());
     }
 
     public Map<String, Integer> getUserIdToIdx() {
