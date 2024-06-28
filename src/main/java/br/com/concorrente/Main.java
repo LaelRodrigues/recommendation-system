@@ -58,7 +58,7 @@ public class Main {
 
         processRecommendations(dataManager, "A3UH4UZ4RSVO82");
         
-        Thread.sleep(60000);
+        Thread.sleep(1000000);
 
         spark.close();
     }
