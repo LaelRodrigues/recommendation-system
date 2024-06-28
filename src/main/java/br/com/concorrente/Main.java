@@ -15,7 +15,7 @@ import java.util.Map;
 public class Main {
 
     public static void main(String[] args) throws InterruptedException {
-    	String caminhoArquivo = "src/main/resources/dataframe_parquet_v2.parquet";
+    	String caminhoArquivo = "src/main/resources/dataframe_parquet_v1.parquet";
 
         SparkSession spark = SparkSession.builder()	
                 .appName("RecomendacaoDeLivros")
@@ -57,6 +57,7 @@ public class Main {
         df.createOrReplaceTempView("book_ratings");
         
         Dataset<Row> highRatingsDf = spark.sql("SELECT * FROM book_ratings WHERE rating_category = 'High'");
+       
         
         highRatingsDf.show(5);
         
@@ -65,6 +66,8 @@ public class Main {
         
 
         long startTime = System.currentTimeMillis();
+        
+        Thread.sleep(15000);
         
         DataManager dataManager = new DataManager(highRatingsDf);
 
