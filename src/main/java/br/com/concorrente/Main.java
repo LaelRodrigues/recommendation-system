@@ -9,7 +9,7 @@ import java.util.Map;
 public class Main {
 
     public static void main(String[] args) {
-        String caminhoArquivo = "src/main/resources/teste3.csv";
+        String caminhoArquivo = "src/main/resources/dataframe_csv_v1.csv";
 
         SparkConf conf = new SparkConf().setAppName("RecomendacaoDeLivros")
                 .setMaster("local[*]");
@@ -17,6 +17,8 @@ public class Main {
         JavaSparkContext sc = new JavaSparkContext(conf);
 
         JavaRDD<String> csvData = sc.textFile(caminhoArquivo);
+        
+        // processamento do algoritmo de recomendação
 
         long startTime = System.currentTimeMillis();
 
@@ -28,15 +30,8 @@ public class Main {
 	
         System.out.println("tempo de resposta: " + duration + " em milissegundos");
 	
-        startTime = System.currentTimeMillis();
-
         processRecommendations(dataManager, "A3UH4UZ4RSVO82");
-
-        endTime = System.currentTimeMillis();
-        duration = endTime - startTime;
-        System.out.println("Tempo de resposta: " + duration + " milissegundos");
         
-
         try {
             Thread.sleep(60000);
         } catch (InterruptedException e) {
