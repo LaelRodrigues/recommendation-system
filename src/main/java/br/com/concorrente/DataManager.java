@@ -6,10 +6,10 @@ import org.apache.spark.sql.Row;
 import java.util.*;
 
 public class DataManager {
-    private Map<String, Integer> userIdToIdx;
-    private Map<String, Integer> bookTitleToIdx;
-    private List<String> bookTitles;
-    private Map<Integer, Map<Integer, Double>> ratingsMatrix;
+    private final Map<String, Integer> userIdToIdx;
+    private final Map<String, Integer> bookTitleToIdx;
+    private final List<String> bookTitles;
+    private final Map<Integer, Map<Integer, Double>> ratingsMatrix;
 
     public DataManager(Dataset<Row> data) {
         userIdToIdx = new HashMap<>();
