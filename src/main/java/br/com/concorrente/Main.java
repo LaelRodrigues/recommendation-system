@@ -44,11 +44,10 @@ public class Main {
         
         df.show(5); 
         
-
+        // processamento do algoritmo de recomendação
 
         long startTime = System.currentTimeMillis();
         
-
         DataManager dataManager = new DataManager(df);
 
         long endTime = System.currentTimeMillis();
