@@ -3,48 +3,52 @@ package br.com.concorrente;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
+import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class DataManager {
-    private final Map<String, Integer> userIdToIdx;
+public class DataManager implements Serializable {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private final Map<String, Integer> userIdToIdx;
     private final Map<String, Integer> bookTitleToIdx;
     private final List<String> bookTitles;
     private final Map<Integer, Map<Integer, Double>> ratingsMatrix;
+    private final AtomicInteger userIndexCounter;
+    private final AtomicInteger bookTitleCounter;
 
     public DataManager(Dataset<Row> data) {
         userIdToIdx = new HashMap<>();
         bookTitleToIdx = new HashMap<>();
         bookTitles = new ArrayList<>();
         ratingsMatrix = new HashMap<>();
+        userIndexCounter = new AtomicInteger(0);
+        bookTitleCounter = new AtomicInteger(0);
         processData(data);
     }
 
     private void processData(Dataset<Row> data) {
-        List<Row> rows = data.collectAsList();
-        int userIndex = 0;
-        int bookIndex = 0;
+    	 data.foreach(row -> {
+	        String userId = row.getString(0);  
+	        Double rating = row.getDouble(1);  
+	        String bookTitle = row.getString(2); 
 
-        for (Row row : rows) {
-            String userId = row.getString(0);
-            Double rating = row.getDouble(1);
-            String bookTitle = row.getString(2);
+	        int userIdx = userIdToIdx.computeIfAbsent(userId, k -> userIndexCounter.getAndIncrement());
+	        int bookIdx = bookTitleToIdx.computeIfAbsent(bookTitle, k -> {
+	            int index = bookTitleCounter.getAndIncrement();
+	            bookTitles.add(bookTitle);
+	            return index;
+	        });
 
+	        
+	        ratingsMatrix.computeIfAbsent(userIdx, k -> new ConcurrentHashMap<>()).put(bookIdx, rating);
+	        
+    	 });
 
-            if (!userIdToIdx.containsKey(userId)) {
-                userIdToIdx.put(userId, userIndex);
-                userIndex++;
-            }
-            if (!bookTitleToIdx.containsKey(bookTitle)) {
-                bookTitleToIdx.put(bookTitle, bookIndex);
-                bookTitles.add(bookTitle);
-                bookIndex++;
-            }
-            int userIdx = userIdToIdx.get(userId);
-            int bookIdx = bookTitleToIdx.get(bookTitle);
-            ratingsMatrix.computeIfAbsent(userIdx, k -> new HashMap<>()).put(bookIdx, rating);
-        }
     }
-
     public Map<String, Integer> getUserIdToIdx() {
         return Collections.unmodifiableMap(userIdToIdx);
     }
